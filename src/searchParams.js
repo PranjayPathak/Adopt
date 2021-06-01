@@ -1,5 +1,6 @@
 import { useState, useEffect, React } from "react";
-import Pet from "./pet";
+import Results from "./results";
+import useBreedList from "./useBreedList";
 // import "regenerator-runtime/runtime";
 //due to errorin babel
 
@@ -9,7 +10,7 @@ const SearchParams = () => {
   const [animal, setAnimal] = useState("");
   const [breed, setBreed] = useState("");
   const [pets, setPets] = useState([]);
-  const breeds = [];
+  const [breeds] = useBreedList(animal);
 
   useEffect(() => {
     requestPets();
@@ -17,14 +18,19 @@ const SearchParams = () => {
 
   async function requestPets() {
     const res = await fetch(
-      `http://pets-v2.dev-apis.com/pets?a/nimal=${animal}&location=${location}&breed=${breed}`
+      `http://pets-v2.dev-apis.com/pets?animal=${animal}&location=${location}&breed=${breed}`
     );
     const json = await res.json();
     setPets(json.pets);
   }
   return (
     <div className="search-params">
-      <form>
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          requestPets();
+        }}
+      >
         <label htmlFor="location">
           <input
             id="location"
@@ -74,17 +80,7 @@ const SearchParams = () => {
 
         <button>Submit</button>
       </form>
-      <div id="pets">
-        {pets.map((pet) => (
-          <Pet
-            name={pet.name}
-            animal={pet.animal}
-            breed={pet.breed}
-            key={pet.id}
-          />
-        ))}
-        )
-      </div>
+      <Results pets={pets} />
     </div>
   );
 };
